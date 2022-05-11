@@ -1,0 +1,33 @@
+name: Get latest pre release tag
+description: Queries GitHub GraphQL API and returns the latest pre-release tag
+
+branding:
+  icon: git-commit
+  color: gray-dark
+
+inputs:
+  repository:
+    description: The repository where the release was created
+    required: true
+
+outputs:
+  tag:
+    description: Latest pre-release tag found on application repository
+    value: ${{ steps.release.outputs.tag }}
+  id:
+    description: Latest pre-release id found on application repository
+    value: ${{ steps.release.outputs.id }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Query GH to get latest pre-release
+      uses: actions/github-script@v6
+      id: release
+      env:
+          REPOSITORY: '${{ inputs.repository }}'
+      with:
+        github-token: ${{ env.GITHUB_TOKEN }}
+        script: |
+          const script = require('${{ github.action_path }}/query-releases.js')
+          await script({github, context, core})
